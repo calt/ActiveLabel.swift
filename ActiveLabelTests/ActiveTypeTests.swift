@@ -84,7 +84,7 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
         XCTAssertEqual(currentElementType, ActiveType.mention)
-
+        
         label.text = "@_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
@@ -114,7 +114,7 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
         XCTAssertEqual(currentElementType, ActiveType.mention)
-
+        
         label.text = "word@mention"
         XCTAssertEqual(activeElements.count, 0)
         label.text = "@u"
@@ -130,12 +130,12 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
         XCTAssertEqual(currentElementType, ActiveType.hashtag)
-
+        
         label.text = "#somehashtag."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
         XCTAssertEqual(currentElementType, ActiveType.hashtag)
-
+        
         label.text = "#_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
@@ -175,17 +175,17 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
         XCTAssertEqual(currentElementType, ActiveType.url)
-
+        
         label.text = "https://www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "https://www.google.com")
         XCTAssertEqual(currentElementType, ActiveType.url)
-
+        
         label.text = "http://www.google.com."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
         XCTAssertEqual(currentElementType, ActiveType.url)
-
+        
         label.text = "www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "www.google.com")
@@ -195,30 +195,30 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
         XCTAssertEqual(currentElementType, ActiveType.url)
-
+        
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
     }
-
+    
     func testCustomType() {
         let newType = ActiveType.custom(pattern: "\\sare\\b")
         label.enabledTypes.append(newType)
-
+        
         label.text = "we are one"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
-
+        
         label.text = "are. are"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
-
+        
         label.text = "helloare are"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
-
+        
         label.text = "google"
         XCTAssertEqual(activeElements.count, 0)
     }
@@ -233,7 +233,7 @@ class ActiveTypeTests: XCTestCase {
             label.configureLinkAttribute = { type, attributes, isSelected in
                 var atts = attributes
                 if case newType = type {
-                    atts[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 14)
+                    atts[NSAttributedStringKey.font] = UIFont.boldSystemFont(ofSize: 14)
                 }
                 
                 return atts
@@ -248,12 +248,12 @@ class ActiveTypeTests: XCTestCase {
         // Enumber after attributes and find our font
         var foundCustomAttributedStyling = false
         areText.enumerateAttributes(in: NSRange(location: 0, length: areText.length), options: [.longestEffectiveRangeNotRequired], using: { (attributes, range, stop) in
-            foundCustomAttributedStyling = attributes[NSFontAttributeName] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
+            foundCustomAttributedStyling = attributes[NSAttributedStringKey.font] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
         })
-
+        
         XCTAssertTrue(foundCustomAttributedStyling)
     }
-
+    
     func testRemoveHandleMention() {
         label.handleMentionTap({_ in })
         XCTAssertNotNil(label.handleMentionTap)
@@ -292,14 +292,14 @@ class ActiveTypeTests: XCTestCase {
         label.removeHandle(for: newType2)
         XCTAssertEqual(label.customTapHandlers.count, 0)
     }
-
+    
     func testFiltering() {
         label.text = "@user #tag"
         XCTAssertEqual(activeElements.count, 2)
-
+        
         label.filterMention { $0 != "user" }
         XCTAssertEqual(activeElements.count, 1)
-
+        
         label.filterHashtag { $0 != "tag" }
         XCTAssertEqual(activeElements.count, 0)
     }
@@ -315,104 +315,104 @@ class ActiveTypeTests: XCTestCase {
         label.text = "wwwbar"
         XCTAssertEqual(activeElements.count, 0)
     }
-
+    
     func testOnlyMentionsEnabled() {
         label.enabledTypes = [.mention]
-
+        
         label.text = "@user #hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "user")
         XCTAssertEqual(currentElementType, ActiveType.mention)
-
+        
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "#somehashtag"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "@userNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "userNumberOne")
         XCTAssertEqual(currentElementType, ActiveType.mention)
     }
-
+    
     func testOnlyHashtagEnabled() {
         label.enabledTypes = [.hashtag]
-
+        
         label.text = "@user #hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "hashtag")
         XCTAssertEqual(currentElementType, ActiveType.hashtag)
-
+        
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "@someuser"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "#hashtagNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "hashtagNumberOne")
         XCTAssertEqual(currentElementType, ActiveType.hashtag)
     }
-
+    
     func testOnlyURLsEnabled() {
         label.enabledTypes = [.url]
-
+        
         label.text = "http://www.google.com #hello"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
         XCTAssertEqual(currentElementType, ActiveType.url)
-
+        
         label.text = "@user"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "#somehashtag"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = " http://www.apple.com @userNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "http://www.apple.com")
         XCTAssertEqual(currentElementType, ActiveType.url)
     }
-
+    
     func testOnlyCustomEnabled() {
         let newType = ActiveType.custom(pattern: "\\sare\\b")
         label.enabledTypes = [newType]
-
+        
         label.text = "http://www.google.com  are #hello"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
-
+        
         label.text = "@user"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = "#somehashtag"
         XCTAssertEqual(activeElements.count, 0)
-
+        
         label.text = " http://www.apple.com are @userNumberOne #hashtag http://www.google.com are @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
     }
-
+    
     func testStringTrimming() {
         let text = "Tweet with long url: https://twitter.com/twicket_app/status/649678392372121601 and short url: https://hello.co"
         label.urlMaximumLength = 30
         label.text = text
-
+        
         XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
     }
-
+    
     func testStringTrimmingURLShorterThanLimit() {
         let text = "Tweet with short url: https://hello.co"
         label.urlMaximumLength = 30
         label.text = text
-
+        
         XCTAssertEqual(text, label.text!)
     }
-
+    
     func testStringTrimmingURLLongerThanLimit() {
         let trimLimit = 30
         let url = "https://twitter.com/twicket_app/status/649678392372121601"
@@ -420,10 +420,10 @@ class ActiveTypeTests: XCTestCase {
         let text = "Tweet with long url: \(url)"
         label.urlMaximumLength = trimLimit
         label.text = text
-
-
+        
+        
         XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
-
+        
         switch activeElements.first! {
         case .url(let original, let trimmed):
             XCTAssertEqual(original, url)
@@ -431,6 +431,6 @@ class ActiveTypeTests: XCTestCase {
         default:
             XCTAssert(false)
         }
-
+        
     }
 }
